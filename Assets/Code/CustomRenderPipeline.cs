@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CustomSRP
 {
@@ -87,6 +90,17 @@ namespace CustomSRP
 						var filteringSettings = FilteringSettings.defaultValue;
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
+
+#if UNITY_EDITOR
+					// Draw Gizmos
+					{
+						if (Handles.ShouldRenderGizmos())
+						{
+							context.DrawGizmos(camera, GizmoSubset.PreImageEffects);
+							context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
+						}
+					}
+#endif
 				}
 				commandBuffer.EndSample("Custom Render");
 				context.ExecuteCommandBuffer(commandBuffer);
