@@ -24,14 +24,13 @@ namespace CustomSRP
 					name = "Render Camera"
 				};
 
-
 				context.SetupCameraProperties(camera);
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
+				context.ExecuteCommandBuffer(commandBuffer);
+				commandBuffer.Clear();
+				
 				commandBuffer.BeginSample("Custom Render");
 				{
-					context.ExecuteCommandBuffer(commandBuffer);
-					commandBuffer.Clear();
-					
 					var drawingSettings = new DrawingSettings();
 					var filteringSettings = new FilteringSettings();
 					var cullingResults = context.Cull(ref cullingParameters);
