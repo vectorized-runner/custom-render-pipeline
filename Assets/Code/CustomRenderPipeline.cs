@@ -21,13 +21,13 @@ namespace CustomSRP
 					name = "Render Camera"
 				};
 
+				context.SetupCameraProperties(camera);
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
 				commandBuffer.BeginSample("Custom Render");
 				{
 					context.ExecuteCommandBuffer(commandBuffer);
 					commandBuffer.Clear();
 					
-					context.SetupCameraProperties(camera);
 					context.DrawSkybox(camera);
 				}
 				commandBuffer.EndSample("Custom Render");
