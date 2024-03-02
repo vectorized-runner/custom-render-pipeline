@@ -8,7 +8,7 @@ namespace CustomSRP
 	{
 		protected override RenderPipeline CreatePipeline()
 		{
-			return null;
+			return new CustomRenderPipeline();
 		}
 	}
 }
