@@ -31,8 +31,10 @@ namespace CustomSRP
 				
 				commandBuffer.BeginSample("Custom Render");
 				{
-					var drawingSettings = new DrawingSettings();
-					var filteringSettings = new FilteringSettings();
+					var sortingSettings = new SortingSettings(camera);
+					// Currently we only Support unlit material
+					var drawingSettings = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sortingSettings);
+					var filteringSettings = new FilteringSettings(RenderQueueRange.all);
 					var cullingResults = context.Cull(ref cullingParameters);
 					context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					
