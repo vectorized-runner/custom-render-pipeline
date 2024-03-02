@@ -22,19 +22,23 @@ namespace CustomSRP
 				if (!camera.TryGetCullingParameters(out var cullingParameters))
 					continue;
 
+				// Reason why I've set it up like this: https://forum.unity.com/threads/profilingsample-usage-in-custom-srp.638941/
+				// It needs to show up nicely on the Frame Debugger
+				const string sampleName = "Custom Render Loop";
 				var commandBuffer = new CommandBuffer
 				{
-					name = "Custom Render Buffer"
+					name = sampleName,
 				};
 
 				context.SetupCameraProperties(camera);
 				// Clear what's drawn on the RenderTarget from the previous frame
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
-				context.ExecuteCommandBuffer(commandBuffer);
-				commandBuffer.Clear();
-
-				commandBuffer.BeginSample("Custom Render");
+				
+				commandBuffer.BeginSample(sampleName);
 				{
+					context.ExecuteCommandBuffer(commandBuffer);
+					commandBuffer.Clear();
+					
 					var cullingResults = context.Cull(ref cullingParameters);
 					// Currently we only Support unlit material
 					var shaderTagId = new ShaderTagId("SRPDefaultUnlit");
@@ -102,10 +106,10 @@ namespace CustomSRP
 					}
 #endif
 				}
-				commandBuffer.EndSample("Custom Render");
+				commandBuffer.EndSample(sampleName);
 				context.ExecuteCommandBuffer(commandBuffer);
 				commandBuffer.Clear();
-
+				
 				context.Submit();
 			}
 		}
