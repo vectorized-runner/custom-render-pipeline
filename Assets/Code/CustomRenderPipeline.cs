@@ -72,9 +72,14 @@ namespace CustomSRP
 							new ShaderTagId("VertexLM")
 						};
 
-						var drawingSettings = new DrawingSettings(legacyShaderTagIds[0], new SortingSettings(camera));
+						var errorMaterial = new Material(Shader.Find("Hidden/InternalErrorShader"));
+						var sortingSettings = new SortingSettings(camera);
+						var drawingSettings = new DrawingSettings(default, sortingSettings)
+						{
+							overrideMaterial = errorMaterial
+						};
 
-						for (int i = 1; i < legacyShaderTagIds.Length; i++)
+						for (int i = 0; i < legacyShaderTagIds.Length; i++)
 						{
 							drawingSettings.SetShaderPassName(i, legacyShaderTagIds[i]);
 						}
