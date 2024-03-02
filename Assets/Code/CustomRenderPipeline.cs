@@ -16,11 +16,25 @@ namespace CustomSRP
 		{
 			foreach (var camera in cameras)
 			{
-				// Render the Camera
+				var commandBuffer = new CommandBuffer
 				{
+					name = "Render Camera"
+				};
+
+				commandBuffer.ClearRenderTarget(true, true, Color.clear);
+				commandBuffer.BeginSample("Custom Render");
+				{
+					context.ExecuteCommandBuffer(commandBuffer);
+					commandBuffer.Clear();
+					
+					context.SetupCameraProperties(camera);
 					context.DrawSkybox(camera);
-					context.Submit();
 				}
+				commandBuffer.EndSample("Custom Render");
+				context.ExecuteCommandBuffer(commandBuffer);
+				commandBuffer.Clear();
+				
+				context.Submit();
 			}
 		}
 	}
