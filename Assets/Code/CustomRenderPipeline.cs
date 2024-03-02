@@ -21,24 +21,44 @@ namespace CustomSRP
 				
 				var commandBuffer = new CommandBuffer
 				{
-					name = "Render Camera"
+					name = "Custom Render Buffer"
 				};
 
 				context.SetupCameraProperties(camera);
+				// Clear what's drawn on the RenderTarget from the previous frame
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
 				context.ExecuteCommandBuffer(commandBuffer);
 				commandBuffer.Clear();
 				
 				commandBuffer.BeginSample("Custom Render");
 				{
-					var sortingSettings = new SortingSettings(camera);
-					// Currently we only Support unlit material
-					var drawingSettings = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sortingSettings);
-					var filteringSettings = new FilteringSettings(RenderQueueRange.all);
 					var cullingResults = context.Cull(ref cullingParameters);
-					context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+					// Currently we only Support unlit material
+					var shaderTagId = new ShaderTagId("SRPDefaultUnlit");
+					
+					// Draw Opaque Objects
+					{
+						var sortingSettings = new SortingSettings(camera)
+						{
+							criteria = SortingCriteria.CommonOpaque
+						};
+						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
+						var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
+						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+					}
 					
 					context.DrawSkybox(camera);
+
+					// Draw Transparent objects after Skybox, as Transparent objects don't write to the Depth Buffer, Skybox overwrites them
+					{
+						var sortingSettings = new SortingSettings(camera)
+						{
+							criteria = SortingCriteria.CommonTransparent
+						};
+						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
+						var filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
+						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+					}
 				}
 				commandBuffer.EndSample("Custom Render");
 				context.ExecuteCommandBuffer(commandBuffer);
