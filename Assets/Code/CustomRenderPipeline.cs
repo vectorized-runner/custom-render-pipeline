@@ -18,7 +18,7 @@ namespace CustomSRP
 			{
 				if (!camera.TryGetCullingParameters(out var cullingParameters))
 					continue;
-				
+
 				var commandBuffer = new CommandBuffer
 				{
 					name = "Custom Render Buffer"
@@ -29,13 +29,13 @@ namespace CustomSRP
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
 				context.ExecuteCommandBuffer(commandBuffer);
 				commandBuffer.Clear();
-				
+
 				commandBuffer.BeginSample("Custom Render");
 				{
 					var cullingResults = context.Cull(ref cullingParameters);
 					// Currently we only Support unlit material
 					var shaderTagId = new ShaderTagId("SRPDefaultUnlit");
-					
+
 					// Draw Opaque Objects
 					{
 						var sortingSettings = new SortingSettings(camera)
@@ -46,7 +46,7 @@ namespace CustomSRP
 						var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
-					
+
 					context.DrawSkybox(camera);
 
 					// Draw Transparent objects after Skybox, as Transparent objects don't write to the Depth Buffer, Skybox overwrites them
@@ -59,11 +59,34 @@ namespace CustomSRP
 						var filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
+
+					// Draw Unsupported Shaders (Unsupported by our pipeline)
+					{
+						var legacyShaderTagIds = new[]
+						{
+							new ShaderTagId("Always"),
+							new ShaderTagId("ForwardBase"),
+							new ShaderTagId("PrepassBase"),
+							new ShaderTagId("Vertex"),
+							new ShaderTagId("VertexLMRGBM"),
+							new ShaderTagId("VertexLM")
+						};
+
+						var drawingSettings = new DrawingSettings(legacyShaderTagIds[0], new SortingSettings(camera));
+
+						for (int i = 1; i < legacyShaderTagIds.Length; i++)
+						{
+							drawingSettings.SetShaderPassName(i, legacyShaderTagIds[i]);
+						}
+
+						var filteringSettings = FilteringSettings.defaultValue;
+						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+					}
 				}
 				commandBuffer.EndSample("Custom Render");
 				context.ExecuteCommandBuffer(commandBuffer);
 				commandBuffer.Clear();
-				
+
 				context.Submit();
 			}
 		}
