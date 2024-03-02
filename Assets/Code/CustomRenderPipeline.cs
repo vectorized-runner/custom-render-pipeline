@@ -16,10 +16,14 @@ namespace CustomSRP
 		{
 			foreach (var camera in cameras)
 			{
+				if (!camera.TryGetCullingParameters(out var cullingParameters))
+					continue;
+				
 				var commandBuffer = new CommandBuffer
 				{
 					name = "Render Camera"
 				};
+
 
 				context.SetupCameraProperties(camera);
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
@@ -27,6 +31,11 @@ namespace CustomSRP
 				{
 					context.ExecuteCommandBuffer(commandBuffer);
 					commandBuffer.Clear();
+					
+					var drawingSettings = new DrawingSettings();
+					var filteringSettings = new FilteringSettings();
+					var cullingResults = context.Cull(ref cullingParameters);
+					context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					
 					context.DrawSkybox(camera);
 				}
