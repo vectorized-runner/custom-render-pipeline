@@ -19,17 +19,6 @@ namespace CustomSRP
 		{
 			foreach (var camera in cameras)
 			{
-#if UNITY_EDITOR
-				// This may add geometry to the scene, it needs to be done before culling
-				if (camera.cameraType == CameraType.SceneView)
-				{
-					ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
-				}
-#endif
-				
-				if (!camera.TryGetCullingParameters(out var cullingParameters))
-					continue;
-
 				// Reason why I've set it up like this: https://forum.unity.com/threads/profilingsample-usage-in-custom-srp.638941/
 				// It needs to show up nicely on the Frame Debugger
 				const string sampleName = "Custom Render Loop";
@@ -41,12 +30,26 @@ namespace CustomSRP
 				context.SetupCameraProperties(camera);
 				// Clear what's drawn on the RenderTarget from the previous frame
 				commandBuffer.ClearRenderTarget(true, true, Color.clear);
-				
+
 				commandBuffer.BeginSample(sampleName);
 				{
 					context.ExecuteCommandBuffer(commandBuffer);
 					commandBuffer.Clear();
-					
+
+#if UNITY_EDITOR
+					// This may add geometry to the scene, it needs to be done before culling
+					if (camera.cameraType == CameraType.SceneView)
+					{
+						ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
+					}
+#endif
+
+					if (!camera.TryGetCullingParameters(out var cullingParameters))
+					{
+						// TODO: I probably need to EndSample here, but currently this branch is never taken
+						continue;
+					}
+
 					var cullingResults = context.Cull(ref cullingParameters);
 					// Currently we only Support unlit material
 					var shaderTagId = new ShaderTagId("SRPDefaultUnlit");
@@ -117,7 +120,7 @@ namespace CustomSRP
 				commandBuffer.EndSample(sampleName);
 				context.ExecuteCommandBuffer(commandBuffer);
 				commandBuffer.Clear();
-				
+
 				context.Submit();
 			}
 		}
