@@ -19,6 +19,14 @@ namespace CustomSRP
 		{
 			foreach (var camera in cameras)
 			{
+#if UNITY_EDITOR
+				// This may add geometry to the scene, it needs to be done before culling
+				if (camera.cameraType == CameraType.SceneView)
+				{
+					ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
+				}
+#endif
+				
 				if (!camera.TryGetCullingParameters(out var cullingParameters))
 					continue;
 
