@@ -4,6 +4,8 @@
 
 #include "Common.hlsl"
 
+float4 _BaseColor;
+
 float4 UnlitPassVertex(float3 objectSpacePosition : POSITION) : SV_POSITION
 {
     const float3 positionWS = TransformObjectToWorld(objectSpacePosition.xyz);
@@ -12,5 +14,5 @@ float4 UnlitPassVertex(float3 objectSpacePosition : POSITION) : SV_POSITION
 
 float4 UnlitPassFragment() : SV_TARGET
 {
-    return 0.0;
+    return _BaseColor;
 }
