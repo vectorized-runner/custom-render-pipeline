@@ -21,7 +21,7 @@ namespace CustomSRP
 			{
 				// Reason why I've set it up like this: https://forum.unity.com/threads/profilingsample-usage-in-custom-srp.638941/
 				// It needs to show up nicely on the Frame Debugger
-				const string sampleName = "Custom Render Loop";
+				var sampleName = $"Custom Render Loop - {camera.name}";
 				var commandBuffer = new CommandBuffer
 				{
 					name = sampleName,
