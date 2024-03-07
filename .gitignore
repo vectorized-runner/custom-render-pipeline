@@ -92,8 +92,6 @@ ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 /CodeCoverage
 
 # Unity URP Sample Scenes
-/Assets/Scenes
-/Assets/Scenes*.meta
 /Assets/SharedAssets
 /Assets/SharedAssets*.meta
 /Assets/Tutorials
