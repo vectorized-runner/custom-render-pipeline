@@ -29,7 +29,11 @@ namespace CustomSRP
 
 				context.SetupCameraProperties(camera);
 				// Clear what's drawn on the RenderTarget from the previous frame
-				commandBuffer.ClearRenderTarget(true, true, Color.clear);
+				var clearFlags = camera.clearFlags;
+				var clearDepth = clearFlags <= CameraClearFlags.Depth;
+				var clearColor = clearFlags <= CameraClearFlags.Color;
+				var color = clearFlags == CameraClearFlags.Color ? camera.backgroundColor.linear : Color.clear;
+				commandBuffer.ClearRenderTarget(clearDepth, clearColor, color);
 
 				commandBuffer.BeginSample(sampleName);
 				{
