@@ -9,6 +9,11 @@ namespace CustomSRP
 {
 	public class CustomRenderPipeline : RenderPipeline
 	{
+		public CustomRenderPipeline()
+		{
+			GraphicsSettings.useScriptableRenderPipelineBatching = true;
+		}
+		
 		// This is the old API. Allocates Memory every frame for Camera[], so we won't use it.
 		protected override void Render(ScriptableRenderContext context, Camera[] cameras)
 		{
