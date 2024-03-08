@@ -9,9 +9,12 @@ namespace CustomSRP
 {
 	public class CustomRenderPipeline : RenderPipeline
 	{
-		public CustomRenderPipeline()
+		private readonly SRPSettings _settings;
+		
+		public CustomRenderPipeline(SRPSettings settings)
 		{
-			GraphicsSettings.useScriptableRenderPipelineBatching = true;
+			_settings = settings;
+			GraphicsSettings.useScriptableRenderPipelineBatching = settings.UseSRPBatcher;
 		}
 		
 		// This is the old API. Allocates Memory every frame for Camera[], so we won't use it.
@@ -69,7 +72,11 @@ namespace CustomSRP
 						{
 							criteria = SortingCriteria.CommonOpaque
 						};
-						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
+						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings)
+						{
+							enableInstancing = _settings.UseGPUInstancing,
+							enableDynamicBatching = _settings.UseDynamicBatching,
+						};
 						var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
@@ -82,7 +89,11 @@ namespace CustomSRP
 						{
 							criteria = SortingCriteria.CommonTransparent
 						};
-						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
+						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings)
+						{
+							enableInstancing = _settings.UseGPUInstancing,
+							enableDynamicBatching = _settings.UseDynamicBatching
+						};
 						var filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
