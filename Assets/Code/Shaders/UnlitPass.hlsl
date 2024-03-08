@@ -4,7 +4,10 @@
 
 #include "Common.hlsl"
 
-float4 _BaseColor;
+// Makes it SRP Batcher Compatible.
+CBUFFER_START(UnityPerMaterial)
+    float4 _BaseColor;
+CBUFFER_END
 
 float4 UnlitPassVertex(float3 objectSpacePosition : POSITION) : SV_POSITION
 {
