@@ -4,14 +4,19 @@
 
 #include "Common.hlsl"
 
+struct Attributes
+{
+    float3 objectSpacePosition : POSITION;
+};
+
 // Makes it SRP Batcher Compatible.
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseColor;
 CBUFFER_END
 
-float4 UnlitPassVertex(float3 objectSpacePosition : POSITION) : SV_POSITION
+float4 UnlitPassVertex(Attributes input) : SV_POSITION
 {
-    const float3 positionWS = TransformObjectToWorld(objectSpacePosition.xyz);
+    const float3 positionWS = TransformObjectToWorld(input.objectSpacePosition.xyz);
     return TransformWorldToHClip(positionWS);
 }
 
