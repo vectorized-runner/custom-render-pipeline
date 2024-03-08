@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b547254565454c9a958d7a25db2844b, type: 3}
   m_Name: CustomSRPAsset
   m_EditorClassIdentifier: 
+  _settings:
+    UseGPUInstancing: 1
+    UseSRPBatcher: 1
+    UseDynamicBatching: 0

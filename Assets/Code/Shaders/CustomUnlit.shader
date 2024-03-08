@@ -2,6 +2,7 @@ Shader "Custom RP/Unlit"
 {
     Properties
     {
+        [HideInInspector]
         _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
     }
     SubShader
