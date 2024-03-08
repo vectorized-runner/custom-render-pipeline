@@ -25,10 +25,10 @@ namespace CustomSRP
 					(byte)Random.Range(0, 255),
 					(byte)Random.Range(0, 255),
 					255);
+				
+				_mpb.SetColor(_baseColorId, _color);
+				GetComponent<Renderer>().SetPropertyBlock(_mpb);
 			}
-
-			_mpb.SetColor(_baseColorId, _color);
-			GetComponent<Renderer>().SetPropertyBlock(_mpb);
 		}
 	}
 }
