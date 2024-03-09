@@ -10,6 +10,10 @@ namespace CustomSRP
 	public class CustomRenderPipeline : RenderPipeline
 	{
 		private readonly SRPSettings _settings;
+
+		// Defined in our Shaders
+		private static readonly int _dirLightColorId = Shader.PropertyToID("_DirectionalLightColor");
+		private static readonly int _dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
 		
 		public CustomRenderPipeline(SRPSettings settings)
 		{
@@ -63,6 +67,22 @@ namespace CustomSRP
 					}
 
 					var cullingResults = context.Cull(ref cullingParameters);
+
+					// Setup Lighting
+					{
+						var lightBufferName = "Custom Render - Lighting";
+						var lightBuffer = new CommandBuffer { name = lightBufferName };
+						lightBuffer.BeginSample(lightBufferName);
+						
+						Light light = RenderSettings.sun;
+						lightBuffer.SetGlobalVector(_dirLightColorId, light.color.linear * light.intensity);
+						lightBuffer.SetGlobalVector(_dirLightDirectionId, -light.transform.forward);
+
+						lightBuffer.EndSample(lightBufferName);
+
+						context.ExecuteCommandBuffer(lightBuffer);
+					}
+					
 					var unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 					var litShaderTagId = new ShaderTagId("CustomLit");
 
