@@ -21,6 +21,19 @@ struct FragmentInput
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
+struct Surface
+{
+    float3 normal;
+    float3 color;
+    float alpha;
+};
+
+struct Light
+{
+    float3 color;
+    float3 direction;
+};
+
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 
@@ -31,6 +44,29 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
     UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
     UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
+
+float3 IncomingLight(Surface surface, Light light)
+{
+    return saturate(dot(surface.normal, light.direction)) * light.color;
+}
+
+float3 GetLighting(Surface surface, Light light)
+{
+    return IncomingLight(surface, light) * surface.color;
+}
+
+Light GetDirectionalLight()
+{
+    Light light;
+    light.color = 1.0;
+    light.direction = float3(0.0, 1.0, 0.0);
+    return light;
+}
+
+float3 GetLighting(Surface surface)
+{
+    return GetLighting(surface, GetDirectionalLight());
+}
 
 FragmentInput LitPassVertex(VertexInput input)
 {
@@ -44,8 +80,8 @@ FragmentInput LitPassVertex(VertexInput input)
 
     float4 baseST = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseMap_ST);
     output.baseUV = input.baseUV * baseST.xy + baseST.zw;
-    output.worldSpaceNormal =  worldSpaceNormal;
-    
+    output.worldSpaceNormal = worldSpaceNormal;
+
     return output;
 }
 
@@ -55,13 +91,17 @@ float4 LitPassFragment(FragmentInput input) : SV_TARGET
 
     const float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV);
     const float4 baseColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor);
-    const float4 base = baseMap * baseColor;
+    float4 base = baseMap * baseColor;
 
-#if defined(_CLIPPING)
+    float3 myNormal = normalize(input.worldSpaceNormal);
+
+    #if defined(_CLIPPING)
     // If you pass x <= 0 to clip, it will discard this fragment
     const float cutoff = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff);
     clip(base.a - cutoff);
-#endif
-    
+    #endif
+
+    base.rgb = input.worldSpaceNormal;
+
     return base;
 }
