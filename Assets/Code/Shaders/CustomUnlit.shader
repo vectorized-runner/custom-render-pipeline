@@ -15,6 +15,8 @@ Shader "Custom RP/Unlit"
         _ZWrite ("Z Write", Float) = 1
         
         _BaseMap("Texture", 2D) = "white" {}
+        
+        _Cutoff ("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
     }
     SubShader
     {
@@ -25,7 +27,7 @@ Shader "Custom RP/Unlit"
             // Default (Opaque): Src: One, Dst: Zero (Source gets added in full, Dst is ignored)
             Blend [_SrcBlend] [_DstBlend]
             
-            // Transparent Rendering doesn't write to the depth buffer, Opaque Rendering does
+            // Transparent Rendering shouldn't write to the depth buffer, Opaque Rendering should
             ZWrite [_ZWrite]
 HLSLPROGRAM
             #pragma multi_compile_instancing

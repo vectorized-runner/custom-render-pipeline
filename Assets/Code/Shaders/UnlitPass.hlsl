@@ -27,6 +27,7 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
     // Unity prepares this field for us, Scale and Translation for the Texture
     UNITY_DEFINE_INSTANCED_PROP(float4, _BaseMap_ST)
     UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
+    UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
 FragmentInput UnlitPassVertex(VertexInput input)
@@ -47,7 +48,12 @@ float4 UnlitPassFragment(FragmentInput input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
 
-    float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV);
-    float4 baseColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor);
+    const float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV);
+    const float4 baseColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor);
+    const float4 base = baseMap * baseColor;
+    // If you pass x <= 0 to clip, it will discard this fragment
+    const float cutoff = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff);
+    clip(base.a - cutoff);
+    
     return baseMap * baseColor;
 }
