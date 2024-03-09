@@ -18,7 +18,12 @@ Shader "Custom RP/Unlit"
     {
         Pass
         {
+            // Blend mode is used to make Transparent objects
+            // Src -> What gets drawn now, Dst -> What was drawn earlier
+            // Default (Opaque): Src: One, Dst: Zero (Source gets added in full, Dst is ignored)
             Blend [_SrcBlend] [_DstBlend]
+            
+            // Transparent Rendering doesn't write to the depth buffer, Opaque Rendering does
             ZWrite [_ZWrite]
 HLSLPROGRAM
             #pragma multi_compile_instancing
