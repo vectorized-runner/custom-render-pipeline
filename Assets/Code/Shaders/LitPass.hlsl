@@ -8,6 +8,7 @@ struct VertexInput
 {
     float3 objectSpacePosition : POSITION;
     float2 baseUV : TEXCOORD0;
+    float3 objectSpaceNormal : NORMAL;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -16,6 +17,7 @@ struct FragmentInput
 {
     float4 clipSpacePosition : SV_POSITION;
     float2 baseUV : VAR_BASE_UV;
+    float3 worldSpaceNormal : VAR_NORMAL;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -38,8 +40,11 @@ FragmentInput LitPassVertex(VertexInput input)
     const float3 worldSpacePosition = TransformObjectToWorld(input.objectSpacePosition.xyz);
     output.clipSpacePosition = TransformWorldToHClip(worldSpacePosition);
 
+    const float3 worldSpaceNormal = TransformObjectToWorldNormal(input.objectSpaceNormal);
+
     float4 baseST = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseMap_ST);
     output.baseUV = input.baseUV * baseST.xy + baseST.zw;
+    output.worldSpaceNormal =  worldSpaceNormal;
     
     return output;
 }
