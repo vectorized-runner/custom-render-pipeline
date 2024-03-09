@@ -45,6 +45,11 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
     UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
+CBUFFER_START(_CustomLight)
+    float3 _DirectionalLightColor;
+    float3 _DirectionalLightDirection;
+CBUFFER_END
+
 float3 IncomingLight(Surface surface, Light light)
 {
     return saturate(dot(surface.normal, light.direction)) * light.color;
@@ -58,8 +63,8 @@ float3 GetLighting(Surface surface, Light light)
 Light GetDirectionalLight()
 {
     Light light;
-    light.color = 1.0;
-    light.direction = float3(0.0, 1.0, 0.0);
+    light.color = _DirectionalLightColor;
+    light.direction = _DirectionalLightDirection;
     return light;
 }
 
@@ -93,15 +98,18 @@ float4 LitPassFragment(FragmentInput input) : SV_TARGET
     const float4 baseColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor);
     float4 base = baseMap * baseColor;
 
-    float3 myNormal = normalize(input.worldSpaceNormal);
-
     #if defined(_CLIPPING)
     // If you pass x <= 0 to clip, it will discard this fragment
     const float cutoff = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff);
     clip(base.a - cutoff);
     #endif
 
-    base.rgb = input.worldSpaceNormal;
+    Surface surface;
+    surface.color = base.rgb;
+    surface.normal = normalize(input.worldSpaceNormal);
+    surface.alpha = base.a;
 
-    return base;
+    float3 color = GetLighting(surface);
+
+    return float4(color, surface.alpha);
 }
