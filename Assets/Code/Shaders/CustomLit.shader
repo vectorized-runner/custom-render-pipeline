@@ -34,6 +34,10 @@ Shader "Custom RP/Lit"
     {
         Pass
         {
+            Tags {
+				"LightMode" = "CustomLit"
+			}
+            
             // Blend mode is used to make Transparent objects
             // Src -> What gets drawn now, Dst -> What was drawn earlier
             // Default (Opaque): Src: One, Dst: Zero (Source gets added in full, Dst is ignored)

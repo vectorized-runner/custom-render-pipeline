@@ -63,8 +63,8 @@ namespace CustomSRP
 					}
 
 					var cullingResults = context.Cull(ref cullingParameters);
-					// Currently we only Support unlit material
-					var shaderTagId = new ShaderTagId("SRPDefaultUnlit");
+					var unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+					var litShaderTagId = new ShaderTagId("CustomLit");
 
 					// Draw Opaque Objects
 					{
@@ -72,11 +72,13 @@ namespace CustomSRP
 						{
 							criteria = SortingCriteria.CommonOpaque
 						};
-						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings)
+						var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings)
 						{
 							enableInstancing = _settings.UseGPUInstancing,
 							enableDynamicBatching = _settings.UseDynamicBatching,
 						};
+						drawingSettings.SetShaderPassName(1, litShaderTagId);
+						
 						var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
@@ -89,11 +91,13 @@ namespace CustomSRP
 						{
 							criteria = SortingCriteria.CommonTransparent
 						};
-						var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings)
+						var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings)
 						{
 							enableInstancing = _settings.UseGPUInstancing,
 							enableDynamicBatching = _settings.UseDynamicBatching
 						};
+						drawingSettings.SetShaderPassName(1, litShaderTagId);
+
 						var filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
