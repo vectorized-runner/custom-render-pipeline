@@ -51,9 +51,12 @@ float4 UnlitPassFragment(FragmentInput input) : SV_TARGET
     const float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV);
     const float4 baseColor = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor);
     const float4 base = baseMap * baseColor;
+
+#if defined(_CLIPPING)
     // If you pass x <= 0 to clip, it will discard this fragment
     const float cutoff = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff);
     clip(base.a - cutoff);
+#endif
     
-    return baseMap * baseColor;
+    return base;
 }

@@ -17,6 +17,18 @@ Shader "Custom RP/Unlit"
         _BaseMap("Texture", 2D) = "white" {}
         
         _Cutoff ("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+        
+        // Reason why this is a toggle:
+        // A material usually uses either transparency blending or alpha clipping, 
+        // not both at the same time. A typical clip material is fully opaque except
+        // for the discarded fragments and does write to the depth buffer. 
+        // It uses the AlphaTest render queue, which means that it gets rendered after all fully opaque objects. 
+        // This is done because discarding fragments makes some GPU optimizations impossible, 
+        // as triangles can no longer be assumed to entirely cover what's behind them.
+        
+        // Name of the property '_Clipping' doesn't matter when using a Toggle
+        [Toggle(_CLIPPING)] 
+        _Clipping ("Alpha Clipping", Float) = 0
     }
     SubShader
     {
@@ -30,6 +42,7 @@ Shader "Custom RP/Unlit"
             // Transparent Rendering shouldn't write to the depth buffer, Opaque Rendering should
             ZWrite [_ZWrite]
 HLSLPROGRAM
+			#pragma shader_feature _CLIPPING
             #pragma multi_compile_instancing
             #pragma vertex UnlitPassVertex
             #pragma fragment UnlitPassFragment
