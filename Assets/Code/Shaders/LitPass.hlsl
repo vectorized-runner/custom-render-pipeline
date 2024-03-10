@@ -58,6 +58,7 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
 #define MAX_DIRECTIONAL_LIGHT_COUNT 4
+#define MIN_REFLECTIVITY 0.04
 
 CBUFFER_START(_CustomLight)
     int _DirectionalLightCount;
@@ -85,8 +86,8 @@ Light GetDirectionalLight(int index)
 
 float OneMinusReflectivity(float metallic)
 {
-    const float minReflectivity = 0.04;
-    return max(1.0 - metallic, minReflectivity);
+    const float reflectivity = max(metallic, MIN_REFLECTIVITY);
+    return 1.0 - reflectivity;
 }
 
 BRDF GetBRDF(Surface surface)
