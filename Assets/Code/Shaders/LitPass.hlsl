@@ -37,6 +37,13 @@ struct Light
     float3 direction;
 };
 
+struct BRDF
+{
+    float3 diffuse;
+    float3 specular;
+    float roughness;
+};
+
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 
@@ -63,9 +70,9 @@ float3 IncomingLight(Surface surface, Light light)
     return saturate(dot(surface.normal, light.direction)) * light.color;
 }
 
-float3 GetLighting(Surface surface, Light light)
+float3 GetLighting(Surface surface, BRDF brdf, Light light)
 {
-    return IncomingLight(surface, light) * surface.color;
+    return IncomingLight(surface, light) * brdf.diffuse;
 }
 
 Light GetDirectionalLight(int index)
@@ -76,12 +83,28 @@ Light GetDirectionalLight(int index)
     return light;
 }
 
-float3 GetLighting(Surface surface)
+float OneMinusReflectivity(float metallic)
+{
+    const float minReflectivity = 0.04;
+    return max(1.0 - metallic, minReflectivity);
+}
+
+BRDF GetBRDF(Surface surface)
+{
+    BRDF brdf;
+    // In general, metals reflect all light via specular reflection, and have zero diffuse reflection
+    brdf.diffuse = surface.color * OneMinusReflectivity(surface.metallic);
+    brdf.specular = 0.0;
+    brdf.roughness = 1.0;
+    return brdf;
+}
+
+float3 GetLighting(Surface surface, BRDF brdf)
 {
     float3 color = 0.0;
     for (int i = 0; i < _DirectionalLightCount; i++)
     {
-        color += GetLighting(surface, GetDirectionalLight(i));
+        color += GetLighting(surface, brdf, GetDirectionalLight(i));
     }
     
     return color;
@@ -125,7 +148,7 @@ float4 LitPassFragment(FragmentInput input) : SV_TARGET
     surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
 
-    float3 color = GetLighting(surface);
+    float3 color = GetLighting(surface, GetBRDF(surface));
 
     return float4(color, surface.alpha);
 }
