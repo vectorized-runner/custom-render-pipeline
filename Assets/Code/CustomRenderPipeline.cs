@@ -19,6 +19,9 @@ namespace CustomSRP
 		{
 			_settings = settings;
 			GraphicsSettings.useScriptableRenderPipelineBatching = settings.UseSRPBatcher;
+
+			// Unity doesn't convert light colors to Linear Space by default.
+			GraphicsSettings.lightsUseLinearIntensity = true;
 		}
 		
 		// This is the old API. Allocates Memory every frame for Camera[], so we won't use it.
