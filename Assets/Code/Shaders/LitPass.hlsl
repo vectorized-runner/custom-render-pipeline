@@ -97,7 +97,10 @@ BRDF GetBRDF(Surface surface)
     brdf.diffuse = surface.color * OneMinusReflectivity(surface.metallic);
     // At metallic = 1.0f -> surface.color
     brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
-    brdf.roughness = 1.0;
+
+    // Disney lighting model - adjusting perceptual version is more intuitive when editing materials
+    const float perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
+    brdf.roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
     return brdf;
 }
 
