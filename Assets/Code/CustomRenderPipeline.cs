@@ -85,8 +85,10 @@ namespace CustomSRP
 
 						context.ExecuteCommandBuffer(lightBuffer);
 					}
-					
+
+					// This is Unity Default
 					var unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+					// We have defined this on "CustomLit.shader"
 					var litShaderTagId = new ShaderTagId("CustomLit");
 
 					// Draw Opaque Objects
@@ -101,7 +103,7 @@ namespace CustomSRP
 							enableDynamicBatching = _settings.UseDynamicBatching,
 						};
 						drawingSettings.SetShaderPassName(1, litShaderTagId);
-						
+
 						var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
