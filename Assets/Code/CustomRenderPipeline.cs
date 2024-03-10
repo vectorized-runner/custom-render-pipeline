@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -12,9 +13,14 @@ namespace CustomSRP
 		private readonly SRPSettings _settings;
 
 		// Defined in our Shaders
-		private static readonly int _dirLightColorId = Shader.PropertyToID("_DirectionalLightColor");
-		private static readonly int _dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
-		
+		private static readonly int _dirLightCountId = Shader.PropertyToID("_DirectionalLightCount");
+		private static readonly int _dirLightColorsId = Shader.PropertyToID("_DirectionalLightColors");
+		private static readonly int _dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections");
+
+		private const int _maxDirLightCount = 4;
+		private static Vector4[] _dirLightColors = new Vector4[_maxDirLightCount];
+		private static Vector4[] _dirLightDirections = new Vector4[_maxDirLightCount];
+
 		public CustomRenderPipeline(SRPSettings settings)
 		{
 			_settings = settings;
@@ -23,7 +29,7 @@ namespace CustomSRP
 			// Unity doesn't convert light colors to Linear Space by default.
 			GraphicsSettings.lightsUseLinearIntensity = true;
 		}
-		
+
 		// This is the old API. Allocates Memory every frame for Camera[], so we won't use it.
 		protected override void Render(ScriptableRenderContext context, Camera[] cameras)
 		{
@@ -76,10 +82,32 @@ namespace CustomSRP
 						var lightBufferName = "Custom Render - Lighting";
 						var lightBuffer = new CommandBuffer { name = lightBufferName };
 						lightBuffer.BeginSample(lightBufferName);
-						
-						Light light = RenderSettings.sun;
-						lightBuffer.SetGlobalVector(_dirLightColorId, light.color.linear * light.intensity);
-						lightBuffer.SetGlobalVector(_dirLightDirectionId, -light.transform.forward);
+
+						var visibleLights = cullingResults.visibleLights;
+						var usedLights = 0;
+
+						for (int i = 0; i < visibleLights.Length; i++)
+						{
+							var visibleLight = visibleLights[i];
+							if (visibleLight.lightType != LightType.Directional)
+							{
+								continue;
+							}
+							if (usedLights >= _maxDirLightCount)
+							{
+								Debug.LogError("Maximum amount of Directional Lights exceeded.");
+								break;
+							}
+							
+							_dirLightColors[i] = visibleLight.finalColor;
+							// Extract (-Forward) from Matrix 
+							_dirLightDirections[i] = -visibleLight.localToWorldMatrix.GetColumn(2);
+							usedLights++;
+						}
+
+						lightBuffer.SetGlobalInt(_dirLightCountId, visibleLights.Length);
+						lightBuffer.SetGlobalVectorArray(_dirLightColorsId, _dirLightColors);
+						lightBuffer.SetGlobalVectorArray(_dirLightDirectionsId, _dirLightDirections);
 
 						lightBuffer.EndSample(lightBufferName);
 
