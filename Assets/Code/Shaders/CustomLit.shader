@@ -29,6 +29,9 @@ Shader "Custom RP/Lit"
         // Name of the property '_Clipping' doesn't matter when using a Toggle
         [Toggle(_CLIPPING)] 
         _Clipping ("Alpha Clipping", Float) = 0
+        
+	    _Metallic ("Metallic", Range(0, 1)) = 0
+		_Smoothness ("Smoothness", Range(0, 1)) = 0.5
     }
     SubShader
     {

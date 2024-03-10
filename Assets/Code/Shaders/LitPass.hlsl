@@ -21,11 +21,14 @@ struct FragmentInput
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
+// GPU Shaders are highly optimized, having abstractions like these doesn't hurt performance
 struct Surface
 {
     float3 normal;
     float3 color;
     float alpha;
+    float metallic;
+    float smoothness;
 };
 
 struct Light
@@ -39,6 +42,8 @@ SAMPLER(sampler_BaseMap);
 
 // Makes it SRP Batcher Compatible.
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
+    UNITY_DEFINE_INSTANCED_PROP(float, _Metallic)
+    UNITY_DEFINE_INSTANCED_PROP(float, _Smoothness)
     // Unity prepares this field for us, Scale and Translation for the Texture
     UNITY_DEFINE_INSTANCED_PROP(float4, _BaseMap_ST)
     UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
@@ -117,6 +122,8 @@ float4 LitPassFragment(FragmentInput input) : SV_TARGET
     surface.color = base.rgb;
     surface.normal = normalize(input.worldSpaceNormal);
     surface.alpha = base.a;
+    surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
+    surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
 
     float3 color = GetLighting(surface);
 
