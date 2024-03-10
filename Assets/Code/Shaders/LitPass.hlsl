@@ -45,9 +45,12 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
     UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
+#define MAX_DIRECTIONAL_LIGHT_COUNT 4
+
 CBUFFER_START(_CustomLight)
-    float3 _DirectionalLightColor;
-    float3 _DirectionalLightDirection;
+    int _DirectionalLightCount;
+    float4 _DirectionalLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
+    float4 _DirectionalLightDirections[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
 
 float3 IncomingLight(Surface surface, Light light)
@@ -60,17 +63,23 @@ float3 GetLighting(Surface surface, Light light)
     return IncomingLight(surface, light) * surface.color;
 }
 
-Light GetDirectionalLight()
+Light GetDirectionalLight(int index)
 {
     Light light;
-    light.color = _DirectionalLightColor;
-    light.direction = _DirectionalLightDirection;
+    light.color = _DirectionalLightColors[index].rgb;
+    light.direction = _DirectionalLightDirections[index].xyz;
     return light;
 }
 
 float3 GetLighting(Surface surface)
 {
-    return GetLighting(surface, GetDirectionalLight());
+    float3 color = 0.0;
+    for (int i = 0; i < _DirectionalLightCount; i++)
+    {
+        color += GetLighting(surface, GetDirectionalLight(i));
+    }
+    
+    return color;
 }
 
 FragmentInput LitPassVertex(VertexInput input)
