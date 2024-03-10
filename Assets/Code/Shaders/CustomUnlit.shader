@@ -44,6 +44,7 @@ Shader "Custom RP/Unlit"
 HLSLPROGRAM
 			#pragma shader_feature _CLIPPING
             #pragma multi_compile_instancing
+			#pragma target 3.5
             #pragma vertex UnlitPassVertex
             #pragma fragment UnlitPassFragment
             #include "UnlitPass.hlsl"

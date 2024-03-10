@@ -48,6 +48,7 @@ Shader "Custom RP/Lit"
 HLSLPROGRAM
 			#pragma shader_feature _CLIPPING
             #pragma multi_compile_instancing
+			#pragma target 3.5
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
             #include "LitPass.hlsl"
