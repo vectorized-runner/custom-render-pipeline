@@ -32,6 +32,9 @@ Shader "Custom RP/Lit"
         
 	    _Metallic ("Metallic", Range(0, 1)) = 0
 		_Smoothness ("Smoothness", Range(0, 1)) = 0.5
+    	
+    	[Toggle(_PREMULTIPLY_ALPHA)] 
+    	_PremulAlpha ("Premultiply Alpha", Float) = 0
     }
     SubShader
     {
@@ -49,6 +52,7 @@ Shader "Custom RP/Lit"
             // Transparent Rendering shouldn't write to the depth buffer, Opaque Rendering should
             ZWrite [_ZWrite]
 HLSLPROGRAM
+			#pragma shader_feature _PREMULTIPLY_ALPHA
 			#pragma shader_feature _CLIPPING
             #pragma multi_compile_instancing
 			#pragma target 3.5

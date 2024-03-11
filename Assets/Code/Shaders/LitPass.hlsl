@@ -118,6 +118,11 @@ BRDF GetBRDF(Surface surface)
     BRDF brdf;
     // In general, metals reflect all light via specular reflection, and have zero diffuse reflection
     brdf.diffuse = surface.color * OneMinusReflectivity(surface.metallic);
+
+#if defined(_PREMULTIPLY_ALPHA)
+    brdf.diffuse *= surface.alpha;
+#endif
+    
     // At metallic = 1.0f -> surface.color
     brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
 
