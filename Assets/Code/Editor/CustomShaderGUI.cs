@@ -3,8 +3,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace CustomSRP.Editor
-{
+// Namespace breaks Shader rendering
+// namespace CustomSRP.Editor
+// {
 	public class CustomShaderGUI : ShaderGUI
 	{
 		private MaterialEditor _editor;
@@ -169,4 +170,4 @@ namespace CustomSRP.Editor
 			}
 		}
 	}
-}
+// }
