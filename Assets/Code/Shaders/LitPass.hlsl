@@ -16,6 +16,7 @@ struct VertexInput
 struct FragmentInput
 {
     float4 clipSpacePosition : SV_POSITION;
+    float3 worldSpacePosition : VAR_POSITION;
     float2 baseUV : VAR_BASE_UV;
     float3 worldSpaceNormal : VAR_NORMAL;
     UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -26,6 +27,7 @@ struct Surface
 {
     float3 normal;
     float3 color;
+    float3 viewDirection;
     float alpha;
     float metallic;
     float smoothness;
@@ -66,6 +68,27 @@ CBUFFER_START(_CustomLight)
     float4 _DirectionalLightDirections[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
 
+float Square(float v)
+{
+    return v * v;
+}
+
+float SpecularStrength(Surface surface, BRDF brdf, Light light)
+{
+    float3 h = SafeNormalize(light.direction + surface.viewDirection);
+    float nh2 = Square(saturate(dot(surface.normal, h)));
+    float lh2 = Square(saturate(dot(light.direction, h)));
+    float r2 = Square(brdf.roughness);
+    float d2 = Square(nh2 * (r2 - 1.0) + 1.00001);
+    float normalization = brdf.roughness * 4.0 + 2.0;
+    return r2 / (d2 * max(0.1, lh2) * normalization);
+}
+
+float3 DirectBRDF(Surface surface, BRDF brdf, Light light)
+{
+    return SpecularStrength(surface, brdf, light) * brdf.specular + brdf.diffuse;
+}
+
 float3 IncomingLight(Surface surface, Light light)
 {
     return saturate(dot(surface.normal, light.direction)) * light.color;
@@ -73,7 +96,7 @@ float3 IncomingLight(Surface surface, Light light)
 
 float3 GetLighting(Surface surface, BRDF brdf, Light light)
 {
-    return IncomingLight(surface, light) * brdf.diffuse;
+    return IncomingLight(surface, light) * DirectBRDF(surface, brdf, light);
 }
 
 Light GetDirectionalLight(int index)
@@ -111,7 +134,7 @@ float3 GetLighting(Surface surface, BRDF brdf)
     {
         color += GetLighting(surface, brdf, GetDirectionalLight(i));
     }
-    
+
     return color;
 }
 
@@ -120,8 +143,8 @@ FragmentInput LitPassVertex(VertexInput input)
     FragmentInput output;
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_TRANSFER_INSTANCE_ID(input, output);
-    const float3 worldSpacePosition = TransformObjectToWorld(input.objectSpacePosition.xyz);
-    output.clipSpacePosition = TransformWorldToHClip(worldSpacePosition);
+    output.worldSpacePosition = TransformObjectToWorld(input.objectSpacePosition.xyz);
+    output.clipSpacePosition = TransformWorldToHClip(output.worldSpacePosition);
 
     const float3 worldSpaceNormal = TransformObjectToWorldNormal(input.objectSpaceNormal);
 
@@ -149,6 +172,7 @@ float4 LitPassFragment(FragmentInput input) : SV_TARGET
     Surface surface;
     surface.color = base.rgb;
     surface.normal = normalize(input.worldSpaceNormal);
+    surface.viewDirection = normalize(_WorldSpaceCameraPos - input.worldSpacePosition);
     surface.alpha = base.a;
     surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
