@@ -11,32 +11,32 @@ namespace CustomSRP.Editor
 		private Material[] _materials;
 		private MaterialProperty[] _properties;
 
-		bool Clipping
+		public bool Clipping
 		{
 			set => SetProperty("_Clipping", "_CLIPPING", value);
 		}
 
-		bool PremultiplyAlpha
+		private bool PremultiplyAlpha
 		{
 			set => SetProperty("_PremulAlpha", "_PREMULTIPLY_ALPHA", value);
 		}
 
-		BlendMode SrcBlend
+		public BlendMode SrcBlend
 		{
 			set => SetProperty("_SrcBlend", (float)value);
 		}
 
-		BlendMode DstBlend
+		public BlendMode DstBlend
 		{
 			set => SetProperty("_DstBlend", (float)value);
 		}
 
-		bool ZWrite
+		public bool ZWrite
 		{
 			set => SetProperty("_ZWrite", value ? 1f : 0f);
 		}
 
-		RenderQueue RenderQueue
+		public RenderQueue RenderQueue
 		{
 			set
 			{
@@ -61,17 +61,31 @@ namespace CustomSRP.Editor
 			FadePreset();
 			TransparentPreset();
 		}
+
+		private bool TryGetProperty(string name, out MaterialProperty property)
+		{
+			property = FindProperty(name, _properties, false);
+			return property != null;
 		}
 
-		private void SetProperty(string name, float value)
+		private bool SetProperty(string name, float value)
 		{
-			FindProperty(name, _properties).floatValue = value;
+			if (TryGetProperty(name, out var prop))
+			{
+				prop.floatValue = value;
+				return true;
+			}
+
+			Debug.LogError($"The property '{name}' doesn't exist.");
+			return false;
 		}
 
 		private void SetProperty(string name, string keyword, bool value)
 		{
-			SetProperty(name, value ? 1f : 0f);
-			SetKeyword(keyword, value);
+			if (SetProperty(name, value ? 1f : 0f))
+			{
+				SetKeyword(keyword, value);
+			}
 		}
 
 		private void SetKeyword(string keyword, bool enabled)
