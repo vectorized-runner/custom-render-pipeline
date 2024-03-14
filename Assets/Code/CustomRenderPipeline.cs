@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -75,6 +75,10 @@ namespace CustomSRP
 						continue;
 					}
 
+					// It doesn't make sense to render the shadows further away than camera can see
+					var shadowDistance = math.min(_settings.ShadowSettings.MaxDistance, camera.farClipPlane);
+					cullingParameters.shadowDistance = shadowDistance;
+					
 					var cullingResults = context.Cull(ref cullingParameters);
 
 					// Setup Lighting
