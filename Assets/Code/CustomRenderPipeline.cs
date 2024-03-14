@@ -87,6 +87,28 @@ namespace CustomSRP
 						var shadowBuffer = new CommandBuffer { name = shadowBufferName };
 						shadowBuffer.BeginSample(shadowBufferName);
 						
+						const int maxShadowedDirectionalLightCount = 1;
+
+						var shadowedVisibleLightIndices = new List<int>();
+						var visibleLights = cullingResults.visibleLights;
+						var visibleLightCount = visibleLights.Length;
+						
+						for (int lightIndex = 0; lightIndex < visibleLightCount; lightIndex++)
+						{
+							if (shadowedVisibleLightIndices.Count < maxShadowedDirectionalLightCount)
+							{
+								var light = visibleLights[lightIndex];
+								if (
+									light.light.shadows != LightShadows.None && 
+									light.light.shadowStrength > 0.0f &&
+									cullingResults.GetShadowCasterBounds(lightIndex, out var shadowCasterBounds))
+								{
+									shadowedVisibleLightIndices.Add(lightIndex);
+								}
+							}
+						}
+						
+						// TODO:
 						
 						shadowBuffer.EndSample(shadowBufferName);
 						
