@@ -121,6 +121,25 @@ namespace CustomSRP
 								// Will this cause a problem (?)
 								context.ExecuteCommandBuffer(commandBuffer);
 								commandBuffer.Clear();
+
+								foreach (var shadowLightIndex in shadowedVisibleLightIndices)
+								{
+									var shadowSettings = new ShadowDrawingSettings(cullingResults, shadowLightIndex,
+										BatchCullingProjectionType.Orthographic);
+
+									cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
+										shadowLightIndex, 0, 1, Vector3.zero, atlasSize, 0f, 
+										out var viewMatrix, out var projectionMatrix, out var shadowSplitData);
+
+									shadowSettings.splitData = shadowSplitData;
+									
+									commandBuffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+									
+									context.ExecuteCommandBuffer(shadowBuffer);
+									shadowBuffer.Clear();
+									
+									context.DrawShadows(ref shadowSettings);
+								}
 								
 								commandBuffer.ReleaseTemporaryRT(_dirShadowAtlasId);
 							}
