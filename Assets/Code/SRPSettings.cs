@@ -17,12 +17,7 @@ namespace CustomSRP
 	public struct ShadowSettings
 	{
 		public float MaxDistance;
-	}
-
-	[Serializable]
-	public struct Directional
-	{
-		public TextureSize AtlasSize;
+		public TextureSize DirectionalAtlasSize;
 	}
 
 	public enum TextureSize

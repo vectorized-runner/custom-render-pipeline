@@ -16,6 +16,7 @@ namespace CustomSRP
 		private static readonly int _dirLightCountId = Shader.PropertyToID("_DirectionalLightCount");
 		private static readonly int _dirLightColorsId = Shader.PropertyToID("_DirectionalLightColors");
 		private static readonly int _dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections");
+		private static int _dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
 
 		private const int _maxDirLightCount = 4;
 		private static Vector4[] _dirLightColors = new Vector4[_maxDirLightCount];
@@ -107,8 +108,27 @@ namespace CustomSRP
 								}
 							}
 						}
-						
-						// TODO:
+
+						// Render Shadows
+						{
+							if (shadowedVisibleLightIndices.Count > 0)
+							{
+								var atlasSize = (int)_settings.ShadowSettings.DirectionalAtlasSize;
+								commandBuffer.GetTemporaryRT(_dirShadowAtlasId, atlasSize, atlasSize, 32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
+								commandBuffer.SetRenderTarget(_dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+
+								commandBuffer.ClearRenderTarget(true, false, Color.clear);
+								// Will this cause a problem (?)
+								context.ExecuteCommandBuffer(commandBuffer);
+								commandBuffer.Clear();
+								
+								commandBuffer.ReleaseTemporaryRT(_dirShadowAtlasId);
+							}
+							else
+							{
+								// TODO: Could get 1x1 Texture, for the reasons mentioned in the Tutorial.
+							}
+						}
 						
 						shadowBuffer.EndSample(shadowBufferName);
 						
