@@ -81,6 +81,18 @@ namespace CustomSRP
 					
 					var cullingResults = context.Cull(ref cullingParameters);
 
+					// Setup Shadows
+					{
+						var shadowBufferName = "Custom Render - Shadows";
+						var shadowBuffer = new CommandBuffer { name = shadowBufferName };
+						shadowBuffer.BeginSample(shadowBufferName);
+						
+						
+						shadowBuffer.EndSample(shadowBufferName);
+						
+						context.ExecuteCommandBuffer(shadowBuffer);
+					}
+					
 					// Setup Lighting
 					{
 						var lightBufferName = "Custom Render - Lighting";
@@ -140,6 +152,7 @@ namespace CustomSRP
 						context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 					}
 
+					// Draw Skybox
 					context.DrawSkybox(camera);
 
 					// Draw Transparent objects after Skybox, as Transparent objects don't write to the Depth Buffer, Skybox overwrites them
